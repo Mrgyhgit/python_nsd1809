@@ -1,0 +1,91 @@
+
+完全/增量 备份文件：
+周一完全备份、其他时候则增量备份，检测哪个文件被修改了，哪个文件是新增的
+用到的模块：时间模块，md5校验,倒入导出需要pickle，压缩解压增加文件需要tarfile
+
+from time import strftime
+import os
+import tarfile
+import hashlib
+import pickle
+
+def check_md5(fname): #检测md5值
+    m = hashlib.md5()
+    with open(fname,'rb') as fobj:
+        while True:
+            data = fobj.read(4096)
+            if not data:
+                break
+            m.update(data)
+    return m.hexdigest()
+
+def full_backup(src,dest,md5file):  #完全备份 "需要把包整个文件，并且计算每个文件的md5值"
+    fname = os.path.basename(src.rstrip('/'))
+    fname = '%s_all_%s.tar.gz' % (fname,strftime('%Y%m%d'))
+    fname = os.path.join(dest,fname)
+
+    tar = tarfile.open(fname,'w:gz')
+    tar.add(src)
+    tar.close()
+
+    md5_dict = {}
+    for path,folders,files in os.walk(src):
+        for file in files:
+            full_path = os.path.join(path,file)
+            md5_dict[full_path] = check_md5(full_path)
+    with open(md5file,'wb') as fobj:
+        pickle.dump(md5_dict,fobj)
+
+
+def inc_backup(src,dest,md5file):  #增量备份
+
+    fname = os.path.basename(src.rstrip('/'))
+    fname = '%s_all_%s.tar.gz' % (fname,strftime('%Y%m%d'))
+    fname = os.path.join(dest,fname)
+
+    with open(md5file,'rb') as fobj:
+        old_md5 = pickle.load(fobj)  #取出前一天的md5值备份记录
+
+    new_md5 = {}
+    for path,fllders,files in os.walk(src): #计算当前的md5值
+        for file in files:
+            full_path = os.path.join(path,file)
+            new_md5[full_path] = check_md5(full_path)
+    tar = tarfile.open(fname,'w:gz')
+
+    for key in new_md5: # 判断哪些文件是新增的，哪些文件是改动的，这样的文件才要备份
+        if old_md5.get(key) != new_md5[key]:
+            tar.add(key)
+    tar.close()
+
+    with open(md5file,'wb')  as fobj:
+        pickle.dump(new_md5,fobj)
+
+if __name__ == '__main__':
+    src = '/tmp/mydemo/security/'
+    dest = '/tmp/mydemo/security/'
+    md5file = '/tmp/mydemo/md5.data'
+
+    if strftime('%a') != 'Mon':
+        full_backup(src, dest, md5file)
+    else:
+        inc_backup(src, dest, md5file)
+
+OOP：面向对象编程
+将数据和行为进行融合，可以先创建一个蓝图，然后再根据蓝图创建具体的实例。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
