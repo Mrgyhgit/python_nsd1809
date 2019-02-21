@@ -1,0 +1,2065 @@
+ftp://176.121.0.120
+帐号：python
+密码：python
+教学群：552320360
+石博文：shibw@tedu.cn
+
+
+Python1
+Day01
+python版本2/3不兼容
+目前大部分系统默认安装的是python2，大部分已停止更新
+教学环境是python3版本
+
+终端输入python或python3进入python的不同版本
+使用quit()或exit()或ctrl+D退出
+
+python官网：www.python.org
+pycharm激活：
+1.运行/root/bin/crack
+  选择License Server
+  输入网址：http://127.0.0.1:1017
+
+git
+安装与使用
+安装：yum -y install git
+查看版本信息：git --version
+配置用户信息 用户名/邮箱/默认编译器
+git config --global user.name ""
+git config --global user.email ""
+git config --global core.editor vim
+git config --list	//查看更改信息
+查看文件是否更改
+cat  ~/.gitconfig
+
+git分为工作区、暂存区、版本库
+创建仓库
+mkdir devops
+cd devops
+git init
+在工作区创建文件
+cat << eof > hello.py
+> print("Hello World!")
+> eof
+添加文件到暂存区
+git add hello.py(文件名)
+git status 	//查看暂存区的状态
+git status -s 	//只显示暂存区文件的变化
+确认至仓库
+git commit -m "描述信息"
+更改文件并提交到版本库
+1.git add . --> git commit -m "描述信息"
+2.git commit -am "描述信息" 	//只适用于修改文件，新文件不适用
+删除文件
+git ls-files	//查看版本库中的文件
+git rm 文件名
+git commit -m "描述信息"
+
+搭建本地gitlab服务器
+安装docker容器，并下载gitlab_zh.tar镜像文件，导入
+docker load < gitlab_zh.tar 
+修改真迹ssh端口后，启动容器
+docker run -d -h gitlab --name gitlab -p 443:443 -p 80:80 -p 22:22 --restart always -v /srv/gitlab/config:/etc/gitlab -v /srv/gitlab/logs:/var/log/gitlab -v /srv/gitlab/data gitlab_zh:latest 
+-d 后台运行
+-h 设置虚拟机的主机名
+--name 设置容器名
+-p 真机端口:容器端口，映射端口到真机中
+--restart always  出现问题时重新启动服务
+-v 真机路径:容器路径，映射目录到容器中
+
+启动后直接访问虚拟机IP访问(出现无法连接500/502等会再刷新)
+默认用户root，直接修改密码（不低于8位）
+登陆后创建项目、用户、组等
+
+通过http方式连接远程仓库
+git remote rename origin old-origin	//默认远程仓库origin，重复的话使用此命令改名
+git remote add origin http://192.168.4.1/nsd1809/core_py.git  //连接远程仓库
+git push -u origin --all   //将本地代码推送至远程仓库，-u仓库名，--all全部代码
+
+git remote add	//添加远程仓库
+git remote rename	//重命名远程仓库
+git remote remove	//删除远程仓库
+
+使用ssh方式免密钥登陆
+真机生成密钥，将公钥部署到网页用户中
+ssh-keygen -C 邮箱 -t rsa -N '' -f "/root/.ssh/id_rsa" -b 4096
+ssh-agent	//密钥管理工具	
+ssh-add	//添加到管理工具
+如果遇到权限问题，将私钥权限改为600
+删除已连接的远程仓库
+git remote remove origin
+连接远程仓库
+git remote add origin git@192.168.4.1:nsd1809/core_py.git
+######################################################################################################
+
+
+Day02
+以.py结尾的是python文件
+1.通过解释器运行文件
+python3 文件
+2.在文件中声明解释器，赋予文件执行权限即可
+书写python文件
+cat << eof > hello.py
+#!/usr/bin/env python3	//自动寻找python3解释器，也可以书写python3绝对路径
+print("hello world!")
+eof
+chmod +x hello.py
+
+python语法结构
+1.缩进
+首行以关键字开始，以冒号结束，之后的每一行都要有4个空格的缩进，直到代码结束
+2.注释/换行
+#注释内容
+\换行，注意换行符必须是最后一个字符
+3.同行多个语句(不推荐使用)
+使用；号
+4.帮助信息
+help(关键字)
+help(print)	//查看输出的帮助信息
+print(value,...,sep=' ',end'\n',file=sys.stdout,flush=False)
+value:任意输出的值
+sep:两个值之间的字符默认是一个空格
+end:最后一个字符，默认换行
+help(input)	//查看输入帮助
+input(prompt=None,\)
+prompt:提示字符串，提示用户输入信息，所有返回值默认是字符类型
+
+变量
+变量名称约定
+  -第一个字符只能是大小写字母或下划线
+  -后续字符只能是大小写字母或下划线
+  -区分大小写
+推荐变量名
+  -变量名全部采用小写字母
+  -常量名采用大写字母
+  -简短，有意义
+  -多个单词间用下划线分隔
+  -变量名用名词，函数名用谓词(动词+名词)
+  -类名采用驼峰形式
+python中变量不需要声明数据类型，变量的值是什么类型变量就是什么类型
+声明变量一定要赋值，否则不能声明变量
+支持增量赋值
+a += 1 相当于 a = a + 1
+不支持a++
+
+运算符
+算术运算符
++ - * / //(整除，舍弃小数位) % **(幂运算)
+整数与浮点数进行运算，结果为浮点数
+比较运算符
+< <= > >= == != <>
+逻辑运算符
+and not or
+and运算只要有一个条件False，结果就为False
+or运算只要有一个条件True，结果就为True
+not运算条件为True结果为False，条件为False结果为True
+1<2 and 2>3 
+############################################################################################
+数据类型
+1.数字
+  -int：有符号整数
+  -bool：布尔值(首字母必须大写)
+    True：1  条件成立，存在
+    False：0  条件不成立，不存在
+  -float：浮点数
+  -complex：复数
+    1+2j
+    2+43J
+python默认以十进制数显示
+数字以0b或0B开头表示2进制
+数字以0o或0O开头表示为8进制
+数字以0x或0X开头表示16进制
+
+2.字符串
+  python中引号之间的字符称为字符串
+  python不区分单双引号，意义相同
+  支持三引号，连续的三个单引或双引，可以包含特殊字符
+  python不区分字符和字符串
+字符串切片
+  使用索引运算符[]和切片运算符[:]可得到子字符串
+  第一个字符的索引是0，最后一个是-1
+  子字符串包含切片中的起始下标，但不包含结束下标
+字符串连接
+  使用+号可以将多个字符串拼接在一起
+  使用*号可以将一个字符串重复多次
+字符串比较大小根据ascii码
+'a' < 'b'
+'ab' < 'ac'
+'abc' < 'ac'
+字符串比较运算时，按顺序从第一位开始比较，相同比下一位，比出结果后停止
+
+列表和元组
+容器 可以存放任意类型的数据
+列表的表示方式[value，value，...],可以为空，表示空列表
+使用in/not in 查看列表中是否有某一元素
+list = [1,2,'a']
+向列表末尾追加内容：list.append(value)
+元组是静态的列表，一旦定义，不能改变
+tuple = (1,2,'b')
+
+字典
+字典是由键-值对构成的，通过键取值，不支持下标操作
+dict = {'tel':13011112222}
+dict['tel']
+
+数据类型比较
+按存储模型分类
+  -标量类型：数值，字符串
+  -容器类型：列表，元组，字典
+按更新模型分类
+  -可变类型：列表，字典
+  -不可变类型：数值，字符串，元组
+按访问模型分类
+  -直接访问：数值
+  -顺序访问：列表，元组，字符串
+  -映射访问：字典
+
+if语句
+语法结构
+if expr:
+    if_suite
+else:
+    else_suite
+判断表达是expr的值非0或布尔值为True，执行if代码，否则执行else代码
+expr可以是单独元素，也可以是条件表达式
+单独元素值转换布尔值为False的：0,0.0,(0+0j),'',[],(),{}
+
+三元运算符
+x if expr else y	//如果expr条件成立，输出x，否则输出y
+
+cat << eof > login2.py
+#!/usr/bin/env python3
+user=input('请输入用户名:')
+passwd=input('请输入密码:')
+if user == '' or passwd == '':
+    print('请输入正确的用户和密码！')
+    exit
+elif user == 'bob' and passwd == '123456':
+    print('Login successful')
+else:
+    print('Login inorrect')
+eof
+chmod +x login2.py
+./login2.py
+
+
+cat << eof > grade.py
+#!/usr/bin/env python3
+grade = int(input('请输入成绩：'))
+if grade > 90:
+    print('优秀！')
+elif grade > 80:
+    print('好！')
+elif grade > 70:
+    print('良！')
+elif grade > 60:
+    print('及格！')
+else:
+    print('你要努力了！')
+eof
+chmod +x grade.py
+./grade.py
+
+#剪刀石头布小游戏
+import random	//导入随机模块
+choice = ['剪刀','石头','布']
+win = [['剪刀','布'],['石头','剪刀'],['布','石头']]
+computer = random.choice(choice)
+tmp = '''[0]剪刀
+[1]石头
+[2]布
+请选择(0/1/2)：
+'''
+ind = int(input(tmp))
+player = choice[ind]
+print('computer choice:',computer,'player choice:',player)
+if player == computer:
+    print('平局！')
+elif [player,computer] in win:
+    print('You Win！')
+else:
+    print('You Lose！')
+
+while循环
+循环次数可以预知的情况下，建议采用for循环
+循环次数未知的情况下，建议采用while循环
+num = 2
+print("%d"%num)
+
+打印20以内的偶数
+n = 1
+while n <= 20:
+    if n%2 == 0:
+        print(n)
+    n += 1
+
+练习 要求用户输入用户名，如果用户名不是tom，则一直输入
+方法一：
+uname = input('请输入用户名')
+while uname != 'tom':
+    uname = input('请输入用户名')
+方法二：
+while 1:
+    uname = input('请输入用户名')
+    if uname == 'tom':
+        break	//跳出当前循环，执行下条语句
+
+break:跳出循环，执行下条语句
+continue：跳过本次循环，进入下次循环
+else：python中特有的，在循环结束后会执行else语句，break会跳过此处代码
+while 1:
+    代码
+else:
+    代码
+
+总结：
+语法结构
+缩进：严格按4个空格缩进
+注释：以#开头表示注释
+
+变量
+规则：开头由字母、下划线组成，后续由字母、下划线、数字组成
+
+运算符
+算术运算：+ - * / // % **
+比较运算：> >= < <= == != <>
+逻辑运算：and or not
+
+数据类型
+数字：int,bool,float,complex
+字符串：str
+列表：list
+元组：tuple
+字典：dict
+
+判断语句
+if 条件表达式:
+    代码
+elif 条件表达式:
+    代码
+else:
+    代码
+
+循环
+while 条件表达式:
+    代码
+################################################################################################
+
+Day03
+for循环语法结构
+for 变量 in 可迭代对象:
+    代码
+for循环将可迭代对象中的值按顺序遍历给变量执行代码，直到结束，若后面有else语句，结束后会执行else中的代码
+for循环中的变量结束后还是会存在的，后续使用尽量不要重名
+注意：若可迭代对象为空，则不会创建变量
+range函数：提供循环条件，range(start,end,step=1)，包含开始不包含结束
+
+#九九乘法表
+#range函数，顾头不顾尾，结尾+1
+for i in range(1,10):
+    for j in range(1,i+1):
+        print('%sx%s=%s\t'%(j,i,j*i),end=' ')
+        #print(str(j)+'x'+str(i)+'='+str(j*i)+'\t',end=' ')
+        #print('{0}x{1}={2}\t'.format(j,i,(i*j)),end=' ')
+    print()
+
+列表解析（列表推倒式）def md5(dir):
+    
+
+语法
+[expr for 变量 in 可迭代对象]或	//expr可以和变量搭配使用
+[expr for 变量 in 可迭代对象 if 条件表达式]
+alist = [2+i for i in range(101) if i%2 == 0]
+
+文件对象
+文件打开的方法
+open()方法
+open(file,mode,buffering)打开指定文件
+file：文件路径，mode：访问模式（默认以r模式访问），buffering：缓存（默认-1，使用系统默认缓存）
+文件对象访问模式：
+r：读 （文件不存在会报错）
+w：写 （文件不存在会创建，文件存在会清空文件）
+a：追加 （必要时创建文件）
+
+r+：以读写模式打开（操作同r）
+w+：以读写模式打开（操作同w）
+a+：以读写模式打开（操作同a）
+
+rb/wb/ab：以二进制模式打开
+
+文件输入
+read()读取文件内容
+fobj = open('test.py','r')
+data = fobj.read()	//不写默认读取全部内容，可以设置读取字节数read(5)
+print(data)
+当读取全部内容后，指针会指向文件末尾，再次读取文件则读不到任何数据
+fobj.close()	//关闭文件对象
+
+readline()读取文件光标开始到下一个换行之间的所有内容，即一行；也可以指定读取指定字节readline(5)
+readlines()读取剩余所有行并把他们作为一个字符串列表返回
+
+文件迭代
+fobj = open('test.py')
+for i in fobj:
+    print(i)	//一行一行迭代
+
+文件输出
+write()
+fobj.write('hello world\n')	//向文件写入内容，不会自动添加结束标志，需手工输入
+fobj.writelines(['a\n','b\n'])	//支持字符串列表作为参数写入，也要手工输入结束符
+fobj.flush()	//立即将缓存中的数据同步
+
+操作文件
+pycharm批量注释快捷键ctrl+/
+with语句：简化代码
+with open('test.py') as f(别名):
+    对文件的操作代码
+print(f.closed)	//检测文件是否关闭，关闭返回True，否则False
+
+seek(offset[,whence])	//移动文件指针到不同的位置
+f.seek(0,0)	//将指针移动到开头
+offset是相对于某个位置的偏移量
+whence的值，0表示文件开头，1表示当前位置，2表示文件结尾
+tell()	//返回当前文件指针的位置
+
+标准文件（了解即可）
+标准输入：一般是键盘，使用sys.stdin
+标准输出：一般是显示器缓冲输出，使用sys.stdout
+标准错误：一般是显示器的非缓冲输出，使用sys.stderr
+使用需导入sys模块
+sys.stdout.write('hello')	//等同于print('hello')
+sys.stdin.readline()	//等同于input()
+
+模拟cp操作
+#打开/bin/ls 作为源文件
+f1 = open('/bin/ls','rb')
+#打开/root/ls 作为目标文件
+f2 = open('/root/ll','wb')
+#重复的从源文件读取内容到目标文件，建议一点一点读
+while True:
+    data = f1.read(4096)	//每次读取4096字节
+    #if data == '':
+    if not data:	//判断数据为空，退出循环
+        break
+    f2.write(data)
+#关闭文件
+f1.close()
+f2.close()
+f1.closed	//检测文件是否关闭
+
+
+函数
+简化程序，点少代码的重复，通常代表某一种功能
+函数语法
+def func_name(arguments):
+    '文档字符串'	//描述函数的功能及使用方式
+    代码
+def say():	//定义函数
+    print('hello')
+say()		//调用函数
+#拷贝函数
+def cp(src,dst):
+    '''cp(src,dst)
+    src 源文件路径
+    dst 目标文件路径'''
+    f1 = open(src,'rb')
+    f2 = open(dst,'wb')
+    while True:
+        data = f1.read(4096)
+        if not data:
+            break
+        f2.write(data)
+    f1.close()
+    f2.close()
+
+函数参数
+#在定义函数时的参数称为形参
+def mysum(num1,num2):	
+    return num1 + num2	//return指定函数返回结果
+#调用函数，传递的参数称为实参
+print(mysum(5,6))	
+
+位置参数
+需要使用sys模块的argv列表接收
+import sys
+print(sys.argv) #位置参数列表,将所有位置参数保存在列表中
+print(sys.argv[1])	//打印列表中下标为1的参数
+
+默认参数
+def mysum(num=10):	//定义默认参数num=10
+    print('*'*num)
+mysum()	//没有实参时，使用默认参数10
+
+#使用python书写拷贝功能函数
+#!/usr/bin/env python3
+import sys
+def cp(src,dst):
+    '''cp(src,dst)
+    src 源文件路径
+    dst 目标文件路径'''
+    f1 = open(src,'rb')
+    f2 = open(dst,'wb')
+    while True:
+        data = f1.read(4096)
+        if not data:
+            break
+        f2.write(data)
+    f1.close()
+    f2.close()
+cp(sys.argv[1],sys.argv[2])
+#需要在终端运行
+cp src dst
+
+总结：
+循环语句
+while：循环次数未知
+for：循环次数已知
+
+列表解析
+[expr for i in 迭代对象 if 条件表达式]
+
+文件操作
+open()
+r,w,a,b
+
+读取文件内容
+read()/readline()/readlines()：前两个都可以接受字节数
+
+向文件写入
+write()/writelines()
+
+操作文件内容
+seek()：偏移量，位置（0开头，1当前，2结尾）  //移动指针，一般在二进制文件中移动
+tell()：获取当前光标位置
+with open() as 别名：简化代码
+f.closed	//检测文件是否关闭
+
+函数
+自定义函数：将一些重复的代码放入一个函数中，简化代码，实现某一功能
+文档字符串：描述函数的使用和功能
+
+参数
+形参和实参
+def mysum(a,b):
+    return a + b
+mysum(10,20)
+
+位置参数
+import sys
+sys.argv
+
+默认参数
+def p_star(num=20)
+    print('*'*num)
+p_star()
+p_star(50)
+###########################################################################################
+
+模块
+模块文件名字是去掉.py后的名字
+导入模块：import 模块名
+导入模块中的某一个功能：from 模块名 import 功能名字(使用时不用带模块名)
+模块加载(load)：一个模块只能被加载一次
+
+模块导入的特性
+模块具有一个__name__特殊属性
+当模块文件直接被执行时，__name__的值为__main__
+当模块被另一个文件导入时，__name__的值就是该模块的名字
+
+模块中的变量称为：属性
+模块中的函数称为：方法
+
+内置模块 python定义好的，可以直接导入使用
+标准库模块 python标准库中的模块，可直接导入使用
+第三方模块 需要自己下载安装才能使用
+自定义模块 自己写的模块
+
+string模块
+string.ascii_letters:所有大小写字母
+string.digits:所有数字
+
+生成随机密码
+from random import choice
+from string import ascii_letters
+from string import digits
+
+all_choice = ascii_letters + digits + '_'
+
+def pas(num=8):
+    result = ''
+    for i in range(num):
+        tmp = choice(all_choice)
+        result += tmp
+    return result
+
+if __name__ == '__main__':
+    print(pas())
+################################################################################################
+
+Day04
+shell相关模块：shutil
+复制
+#拷贝文件对象
+with open('/etc/passwd','rb') as src_file:
+    with open('/tmp/mima','wb') as dst_file:
+        shutil.copyfileobj(src_file,dst_file)
+#拷贝文件,只能拷贝文件
+shutil.copyfile('/etc/passwd','/tmp/mima2')nsd1809
+#拷贝文件到文件或目录下，同时复制权限
+shutil.copy('/etc/shadow','/tmp')
+#与copy相同，但会尝试保留所有文件元数据
+shutil.copy2()
+
+移动
+#递归地将文件或目录移动到另一个位置，并返回目标
+shutil.move()
+
+目录操作
+#复制目录,如果目标目录存在会报错
+shutil.copytree()
+#删除目录
+shutil.rmtree()
+
+权限管理
+#只复制权限
+shutil.copymode(src,dst)
+#复制元数据
+shutil.copystat(src,dst)
+更改给定路径的所有者或组
+shutil.chown(path,user='',group='')
+
+语法风格
+变量赋值
+x=y=1
+x,y=1,2
+a=10,b=20
+a,b=b,a	//交换a，b的值
+
+元组的()可以省略，逗号不可以省略
+（1）不是元组
+1，：是元组
+
+合法表示符：主要针对起名（第一个必须时字母或下划线，剩下的可以时字母或下划线或数字，大小写敏感）
+查看python中所有关键字
+import keyword
+print(keyword.kwlist)	//关键字列表
+print(keyword.iskeyword('关键字'))	//检测是否为关键字
+
+内建：内部已经写好的东西，有一些保留字如：True、False、None
+
+模块结构及布局
+#!/usr/bin/env python3		#起始行，声明解释器
+"this is a test module"		#模块文档字符串
+import sys				#导入模块
+import os
+debug = True			#定义全局变量
+class FooClass(object):		#类定义
+    'Foo class'
+    pass
+def test():				#函数定义
+    "test function"
+    foo = FooClass()
+if __name__ == '__main__':	#程序主体
+    test()
+
+import os 
+os.path.exists()	#判断文件是否存在，存在返回True
+
+**************小练习*************
+#!/usr/bin/env python3
+#coding:utf-8
+'''
+编写一个程序，要求用户输入文件名
+如果文件已存在，要求用户重新输入
+提示用户输入数据，每行数据先写到列表中
+将列表数据写入到用户输入的文件名中
+'''
+import os
+#获取用户输入的文件名，并判断是否存在
+def get_fname():
+    while True:
+        fname = input('Please input filename:')
+        if not os.path.exists(fname):
+            break
+        print('file is exists! Please try again!')
+    return fname
+#获取用户输入的数据，并保存到列表
+def get_data():
+    print('请输入数据，输入end结束！')
+    content = []
+    while True:
+        data = input('>>>')
+        if data == 'end':
+            break
+        #content.append(data+'\n')
+        content.append(data)
+    return content
+#将获取的数据写入文件中
+def write_file(fname,data):
+    with open(fname,'w') as f:
+        f.writelines(data)
+#习惯性在当前脚本中测试代码
+if __name__ == '__main__':
+    fname = get_fname()
+    #data = get_data()
+    data = [line+'\n' for line in get_data()]
+    print(fname)
+    print(data)
+    write_file(fname,data)
+
+
+序列操作符
+seq[ind]		#获取下标元素
+seq[ind1:ind2]	#截取ind1和ind2之间数
+seq * expr		#重复expr次
+seq1 + seq2		#连接序列seq1和seq2
+obj in seq		#判断obj是否在seq中
+obj not in seq	#判断obj是否不在seq中
+
+内建函数
+list(iter)	#把可迭代对象转换为列表
+str(obj)	#将obj转换为字符串
+tuple(iter)	#把可迭代对象转换为元组
+len(seq)	#返回seq的长度
+max(seq)	#求seq中最大值
+min(seq)	#求seq中最小值
+enumerate	#枚举，返回序列索引和索引位置对应的值,索引从0开始
+sorted(iter) #接受一个迭代器,返回一个有序的列表,升序排列
+reversed(seq) #接受一个序列作为参数,返回一个逆序排列的迭代器
+
+字符串操作符
+比较操作符:按ascii码进行比较
+切片操作符:[],[:],[::]	[::-1]表示从后往前
+成员关系操作符:in,not in
+
+#!/usr/bin/env python3
+'''
+程序接受用户输入
+判断用户输入的标识符是否合法
+用户输入的标识符不能使用关键字
+有不合法字符，需要指明第几个字符不合法
+'''
+import string
+import keyword
+
+#定义首字符和其余字符
+first_char = string.ascii_letters+'_'
+other_char = string.ascii_letters+string.digits+'_'
+
+#检查用户输入字符是否合法
+def check_id(idt):
+    #判断首字符是否合法
+    if idt[0] not in first_char:
+        return '1st invalid'
+    #判断其余字符是否合法
+    for ind,val in enumerate(idt[1:]):
+        if val not in other_char:
+            return 'char in position %s invalid' %(ind+2)
+    #判断是否为关键字
+    if keyword.iskeyword(idt):
+        return 'is keyword'
+    #以上都不满足,则为合法字符
+    return '%s is vaild' %idt
+
+#测试
+if __name__ == '__main__':
+    print(check_id('8hello'))
+    print(check_id('hell+o'))
+    print(check_id('hello'))
+    print(check_id('True'))
+
+
+格式花操作符
+%c 字符占位符
+%s 字符串占位符
+%d/%i 十进制数占位符
+%o 八进制数占位符
+%e/%E 科学计数法
+%f/%F 浮点数占位符
+print('%5.2f'%(2.5))	//宽度为5,保留2位小数
+* 定义宽度或者小数点精度 %5.2f
+- 左对齐
++ 右对齐
+<sp> 正数前面显示空格
+# 
+0 位数不够使用0填充,不用空格
+
+format函数
+print('{1},{0}'.format('bob',23))	//按位置传参,{0}表示bob,{1}表示23
+{:[填充字符,默认空格][对齐方式<^>][宽度]}
+print('{1:^8},{0:>10}')	//填充<左对齐,^居中,>右对齐
+print('{0[name]},{1[age]}'.format({'name':'bob'},{'age':24}))  //使用关键字参数
+print('{0[0]},{0[1]}'.format(['bob',23]))   //使用索引
+
+原始字符串操作符
+alist = r'C:\test\nsd1809' //所有字符都不会转义,原样输出
+
+import subprocess	//可以使用shell命令的模块
+subprocess.call('cmd',shell=True)
+
+创建随机密码的脚本randpass.py
+from random import choice
+from string import ascii_letters
+from string import digits
+
+all_choice = ascii_letters + digits + '_'
+
+def pas(num=8):
+    result = ''
+    for i in range(num):
+        tmp = choice(all_choice)
+        result += tmp
+    return result
+
+if __name__ == '__main__':
+    print(pas())
+
+创建用户脚本
+  编写一个程序，实现创建用户的功能
+  提示用户输入用户名
+  随机生成8位密码
+  创建用户并设置密码
+  将用户相关信息写入指定文件
+
+import subprocess
+import randpass	//调用随机密码的模块
+
+def create_user(user,pwd,file):
+    subprocess.call('useradd %s' %user,shell=True)
+    subprocess.call(
+        'echo %s | passwd --stdin %s' %(pwd,user),
+        shell=True
+    )
+    with open(file,'a') as f:
+        f.write('user:%s\npwd:%s\n' %(user,pwd))
+
+if __name__ == '__main__':
+    user = 'nsd'
+    pwd = randpass.pas(16)
+    file = '/tmp/a.txt'
+    create_user(user,pwd,file)
+
+
+字符串内建函数
+调用方式 字符串.函数
+string.capitalize()	//字符串的第一个字符大写
+string.title()	//单词首字母大写
+
+string.center(width,'*')	//居中字符串,指定长度为width,默认空格填充,也可手工修改填充字符
+string.ljust(width,'*')  //指定长度为width,用*填充,并左对齐
+string.rjust(width,'*')  //指定长度为width,用*填充,并右对齐
+
+string.count(str,beg=0,end=len(string))  //统计str出现的次数,可以设定范围
+
+string.endswith(obj,beg=0,end=len(string))  //判断是否以obj结束,是返回True,否则False
+string.startwith(同上)	//判断开始字符串,返回True或False
+
+string.islower()	//判断是否全为小写,是返回True,否则False
+string.isupper()	//判断是否全为大写,是返回True,否则False
+
+string.isdigit()	//判断是否为数字
+string.isalpha()	//判断是否为字母
+string.isalnum()	//判断是否为数字或字母
+
+string.strip()	//删除string字符串两端的空白
+string.lstrip()	//删除左边空白字符
+string.rstrip()	//删除右边空白字符
+
+string.upper()	//将小写字母转换为大写字母
+string.lower()	//将大写字母转换为小写字母
+
+string.split('str',num=string.count(str))  //分隔字符串,以str分隔
+print(string.split())
+print('*'.join(list)) 	//以*将列表中字符串拼接起来
+
+列表
+通过下标只能更新值，不能添加新值
+list.append(5)	#向列表末尾添加一个值5
+list.index(60)	#获取列表中60的下标值
+list.insert(index,value)	#向列表中指定的位置插入值
+list.count(60)	#统计60的出现次数
+list.remove(60)	#删除第一个出现的值60
+list.pop(2)		#弹出下标为2的值
+list.reverse()	#翻转
+list.sort()		#升序排序
+list.sor(reverser=True)	#直接降序排列
+list.extend(seq)	#把序列seq内容添加到列表中
+
+元组
+静态的列表，元素组本身不可增删改，但元素中的列表、字典等元素仍可以改变
+tuple.count()	#统计出现次数
+tuple.index()	#查询值的下标
+
+编程思路：
+1、思考
+程序运行方式：交互？非交互？
+如果交互，如何提示用户输入，用户如何回答，直到结束
+2、分析程序有哪些功能，把这些功能写成函数，写出程序的大体框架
+3、逐一编写每个函数
+4、测试代码，修补
+
+#coding:utf-8
+#列表模拟栈结构
+#栈：先进后出的结构,后出先进结构
+# import os
+import subprocess
+
+stack = []
+#压栈功能
+def push_it():
+    subprocess.call('clear')
+    data = input('data to push:').strip()
+    if data:
+        stack.append(data)
+        print('\033[31;1msucessful!\033[0m')
+
+#出栈功能
+def pop_it():
+    subprocess.call('clear')
+    if stack:
+        print('from stack popped \033[31;1m%s\033[0m' %stack.pop())
+    else:
+        print('\033[31;1mEmpty stack!\033[0m')
+
+#查询功能
+def view_it():
+    subprocess.call('clear')
+    print('\033[32;1m%s\033[0m' %stack)
+
+#菜单功能
+def show_menu():
+    cmds = {'0':push_it,'1':pop_it,'2':view_it}
+    alist = ['0','1','2','3']
+    prompt = '''[0] push
+[1] pop
+[2] view
+[3] quit
+Please input your choice (0/1/2/3):'''
+    while True:
+        choice = input(prompt).strip()
+        if choice not in alist:
+            subprocess.call('clear')
+            print('Invalid choice.Try again!')
+            continue
+        if choice == '3':
+            break
+
+        cmds[choice]() 	#cmds['0']()=>push_it()
+        # if choice == '0':
+        #     push_it()
+        # elif choice == '1':
+        #     pop_it()
+        # else:
+        #     view_it()
+
+
+if __name__ == '__main__':
+    show_menu()
+
+########################################################################################################
+
+python2
+Day01
+学习方法；
+1.清楚难点、重点。先掌握重点知识
+2.记主要内容，其他的要了解功能
+3.编程思路
+4.代码量
+
+git pull https://github.com/MrZhangzhg/nsd_2018.git
+
+字典：容器、可变、映射
+1、创建字典的方式
+adict = {'name':'bob','age':24}
+bdict = dict(['ab',['qq','62121878'],('phone','13828456471')])
+cdict = {}.fromkeys(('ab','ls','cd'),8)
+2、访问字典
+只能访问字典的键key，得到值，不能直接访问值
+print(len(adict))
+for key in adict:
+    print('%s:%s' %(key,adict[key]))
+print('%(name)s is %(age)s year old' %adict)
+3、更新字典
+字典的key不能重复
+通过key更新字典，有则更新，没有添加
+
+字典的相关函数
+不可变的才可以作为key，可变的不能作为key
+dict.len()		#返回字典长度
+dict.hash()		#判断是否可以作为字典的键
+dict.keys()		#取出字典的key
+dict.values()	#取出字典的value
+dict.items()	#取出字典的键和值
+dict.get(key,'指定返回值')		#重点，通过键寻找值，找到返回值，没找到默认返回None，也可以指定返回值
+adict = {'name':'bob','age':24}
+print(adict.get('qq'))	==>None
+print(adict.get('qq','not found'))	==>not found
+print(adict.get('name','not found'))	==>bob
+
+dict.pop(key)		#弹出指定key，value
+dict.popitem()	#随机弹出一对键值
+bdict = adict	#两个字典指向同一个地址空间
+id(adict)		#查看字典在内存中的地址
+
+dict.copy()		#重新拷贝一份内容
+cdict = adict.copy()	#内容相同，空间地址不同，复制了一份
+
+dict.update(dict)	#合并其他字典
+dict.clear()	#清空字典
+del dict[key]	#删除字典中的元素，也可以删除整个字典
+
+练习一：模拟用户登陆信息系统
+支持新用户注册，新用户名和密码注册到字典中
+支持老用户登陆，用户名和密码正确提示登陆成功
+主程序通过循环询问进行何种操作，根据用户的选择，执行注册或是登陆操作
+#coding:utf-8
+import getpass
+import subprocess
+user = {}
+
+def register():
+    subprocess.call('clear')
+    username = input('请输入用户名：')
+    passwd = getpass.getpass('请输入密码：')
+    if username in user:
+        print('\033[31;1m用户%s以存在，注册失败！\033[0m' %username)
+    else:
+        user[username] = passwd
+
+def login():
+    subprocess.call('clear')
+    username = input('请输入用户名：')
+    passwd = getpass.getpass('请输入密码：')
+    # if username in user and passwd == user[username]:
+    if user.get(username) == passwd:
+        print('\033[32;1m登陆成功！\033[0m')
+    else:
+        print('\033[31;1m登陆失败!\033[0m')
+
+def show_menu():
+    cmds = {'0':register,'1':login}
+    prompt = '''[0]注册
+[1]登陆
+[2]退出 
+请选择：'''
+    while True:
+        choice = input(prompt).strip()
+        if choice not in ['0','1','2']:
+            print('无效选择，请重试！')
+            continue
+        if choice == '2':
+            break
+        cmds[choice]()
+
+if __name__ == '__main__':
+    show_menu()
+
+cd - 	//切回上次目录
+空白字符：空格、\n回车、\t制表符、\r回车不换行、\v\f
+
+练习二：编写unix2dos的程序
+#coding:utf-8
+'''
+Windows文本文件的行结束标志是\r\n
+类unix文本文件的行结束标志是\n
+编写程序，将unix文本文件格式转换为windows文本文件的格式
+'''
+
+import sys
+
+def unxin2doc(fname):
+    dst_fname = fname + '.txt'
+    with open(fname) as src_fobj:
+        with open(dst_fname,'w') as dst_fobj:
+            for line in src_fobj:
+                line = line.rstrip('\n\r ') + '\r\n'
+                dst_fobj.write(line)
+
+
+if __name__ == '__main__':
+    unxin2doc(sys.argv[1])
+
+
+练习三：编写类进度条程序
+在屏幕上打印20个#号
+符号@从20个#号穿过
+当@符号到达尾部，再从头开始
+#coding:utf-8
+
+import time
+
+counter = 19
+n = 0
+
+print('*' * counter,end='')
+while True:
+    print('\r%s@%s' %('*' * n,'*' * (counter - n)),end='')
+    n += 1
+    time.sleep(0.3)
+    if n == counter:
+        n = 0
+
+集合：由不同的、不可变元素构成一个集合，它是无序的
+集合类似一个没有值的字典，只有键
+可变的集合：set
+不可变的集合：frozenset
+aset = set('abc')
+bset = set('cde')
+aset | bset 	#并集
+aset & bset		#交集
+aset - bset		#补差，aset中有bset中没有的
+aset.add('new')	#添加new到集合，add是将new这个整体添加，可变的类型不可添加
+aset.update()	#将字符串、列表等拆分成单个加入到集合中
+bset.issubset(aset)  #判断bset是否为aset的子集
+aset.issuperset(bset)  #判断aset是否为bset的超集
+aset.union(bset)	# aset | bset
+aset.intersection(bset)  # aset & bset 
+aset.difference(bset) 	# aset - bset
+
+通过集合可以去重
+import random
+alist = [random.randint(1,20) for i in range(20)]	
+aset = set(alist)	#将列表转换为集合
+blist = list(aset)	#将集合转换为列表
+
+时间表示方式：重要
+import time
+1、时间戳：某一时刻距离1970年1月1日0点的妙数，time.time()查看到目前为止的秒数
+2、UTC：世界协调时间。把全球分为24个时区，以格林威治为分隔点，中国utc+8，time.ctime()查看当前时间
+3、9元组：time.localtime()
+>>>t = time.localtime()
+>>>t.tm_year	#年份
+>>>t.tm_wday	#周几，0-6
+
+time模块常用方法：
+time.time()	#返回当前时间的时间戳
+time.ctime()	#返回当前时间的UTC形式
+time.localtime()	#返回当前时间的9元组
+time.sleep(3)	#休眠3秒
+time.strftime('%F')	#显示年月日，可以打印以下所有属性
+
+%a	Locale的缩写工作日名称。	
+%A	Locale的整个工作日名称。	
+%b	语言环境的缩写月份名称。	
+%B	Locale的完整月份名称。	
+%c	语言环境的适当日期和时间表示。	
+%d	一个十进制数字[01,31]。	
+%H	小时（24小时制），十进制数[00,23]。	
+%I	小时（12小时制）十进制数[01,12]。	
+%j	一年中的十进制数[001,366]。	
+%m	月为十进制数[01,12]。	
+%M	以十进制数分钟[00,59]。	
+%p	Locale相当于AM或PM。	
+%S	秒为十进制数[00,61]。
+%U	年的星期数（星期日为星期的第一天）为十进制数[00,53]。在第一个星期日之前的新的一年的所有天被认为是在第0周。	
+%w	工作日为十进制数[0（星期日），6]。	
+%W	年的星期数（星期一作为星期的第一天）作为十进制数[00,53]。在第一个星期一之前的新的一年中的所有天被认为是在第0周。	（3）
+%x	语言环境的适当日期表示。	
+%X	语言环境的适当时间表示。	
+%y	年，无世纪作为十进制数[00,99]。	
+%Y	年份以世纪为十进制数。	
+%z	指示与+ HHMM或-HHMM形式的UTC / GMT的正或负时差的时区偏移，其中H表示十进制小时数字，M表示十进制分数字[-23：59，+23：59]。	
+%Z	时区名称（如果没有时区，则不包含字符）。	
+%%	字面值'%'字符。
+
+datetime模块
+from datetime import datetime
+t = datetime.now()	#年月日时分妙毫秒
+t.year
+t.month
+t.day
+t.hour
+t.minute
+t.second
+t.microsecond	#毫秒
+t1 = datetime(2018,10,1,...)
+t > t1	#比较时间
+
+时间计算
+from datetime import timedelta	
+days = timedelta(days=50,hour=5,...)
+t - days	#50天以前的时间
+t + days	#50天以后的时间
+https://yiyibooks.cn ==> python352中文官方文档翻译 ==> 库参考中
+
+异常处理
+将异常自行处理，不要让系统崩溃，使用try-except语句
+#coding:utf-8
+try:
+    num = int(input('数字：'))
+    result = 100 / num
+    
+except (ValueError,ZeroDivisionError):	#多个条件用(，)间隔
+    print('无效输入！')
+# except ZeroDivisionError:
+#     print('无效输入')
+except (EOFError,KeyboardInterrupt):
+    print('\n手动退出')
+    exit()
+# except KeyboardInterrupt:
+#     print('\n退出')
+#     exit()
+else:		#不发生异常才执行
+    print(result)	
+finally:	#不管异常发不发生都会执行
+    print('Done')
+
+主动触发异常
+1、使用raise触发异常
+def set_age(name,age):
+    if not 0 < age < 120:
+        raise ValueError('年龄超过范围')
+    print('%s is %s years old' %(name,age))
+２、使用assert断言异常
+def set_age1(name,age):
+    assert 0 < age < 120,'年龄超过范围'
+    print('%s is %s years old' %(name,age))
+常用组合try-except和try-finally
+
+os模块，访问文件系统
+os.getcwd()		#pwd
+os.mkdir('/tmp/mydemo')	#mkdir /tmp/mydemo
+os.listdir('/tmp/mydemo')	#ls /tmp/mydemo
+os.chdir('/tmp/mydemo')		#cd /tmp/mydemo
+os.mknod('abc.txt')		#touch abc.txt
+os.chmod('abc.txt',0o644)	#chmod 644 abc.txt，linux权限是8进制数，o表示8进制数
+os.symlink('/etc/hosts','zj')	#ln -s /etc/hosts zj，软连接
+os.unlink('zj')		#unlink zj，删除快捷方式
+os.remove('zj')		#rm zj
+os.path.isfile('/etc/hosts')	#判断是否是文件
+os.path.isdir('/etc/hosts')	#判断是否是目录
+os.path.islink('/etc/grub2.cfg')	#判断是否是软连接
+os.path.exists('/etc')	#判断是否存在
+os.path.split('/etc/sysconfig/network-scripts/ifcfg-eth0') #切割路径
+('/etc/sysconfig/network-scripts', 'ifcfg-eth0')
+os.path.join('/etc/sysconfig/network-scripts', 'ifcfg-eth0')	#拼接路径
+os.path.basename('/etc/sysconfig/network-scripts/ifcfg-eth0')	#获取最后文档名
+os.path.dirname('/etc/sysconfig/network-scripts/ifcfg-eth0')	#获取目录名
+
+pickle模块
+常规文件写操作，只能把字符串对象写入。如果希望写入任意类型数据，取出时不变，使用pickle模块
+pickle是个存储器，可以把任意类型的数据写到文件中，还能再无损地取出来。
+>>> import pickle
+>>> shoplist = ['egg', 'banana', 'apple', 'brush']
+>>> f = open('/tmp/shop.data', 'wb')
+>>> pickle.dump(shoplist, f)	#将列表写入文件
+
+>>> f = open('/tmp/shop.data', 'rb')
+>>> alist = pickle.load(f)	#读取文件内容
+>>> type(alist)
+<class 'list'>
+>>> alist
+['egg', 'banana', 'apple', 'brush']
+
+#######################################################################################################
+
+Day02
+函数
+创建函数，未声明的函数不能对其进行调用def md5(dir):
+    
+
+def foo():
+    print('in foo')
+    bar()
+foo()		#此处调用函数会报错，找不到bar函数，因为程序从上向下执行
+def bar():
+    print('in bar')
+
+if __name__ == '__main__':
+    foo()
+调用函数
+使用()，不加()只是引用函数，显示函数在内存中的位置
+关键字参数
+参数的个数必须与指定的参数个数相同
+def get_age(name,age):
+    print('%s is %s years old' %(name,age))
+get_age(age=20,name='bob')	#默认参数时从前往后一一对应，否则需用此种方式指定参数值
+
+参数个数不固定的函数
+def func1(*args):		#*args表示一个元组，可以接收任意多个参数 
+    print(args)
+func1()
+func1(20)
+func1(10,20,30,'bob','alias')
+
+def func2(**kwargs):	#**kwargs表示一个字典，存储键值对，接收多个参数
+    print(kwargs)
+func2()
+func2(name='bob',age=20)
+
+函数传递参数时，如果使用*号，表示把这个参数的值拆开
+def add(x,y):
+    print(x + y)
+num = [20,15]
+add(*num)		#将列表的值拆开传参
+
+#加减法小游戏
+#coding:utf-8
+import random
+
+def exam():
+    cmds = {'+':lambda x,y : x + y,'-':lambda x,y: x - y}
+    nums = [random.randint(1,100) for i in range(2)]
+    nums.sort(reverse=True)
+    op = random.choice('+-')
+    result = cmds[op](*nums)
+    prompt = '%s %s %s = ' %(nums[0],op,nums[1])
+    counter = 0
+    while counter < 3:
+        try:
+            answer = int(input(prompt))
+        except:     #except为空表示匹配所有异常,不推荐
+            print()
+            continue
+        if answer == result:
+            print('\nVery good!')
+            break
+        # else:
+        print('\nWrong answer!')
+        counter += 1
+    else:
+        print('%s%s' %(prompt,result))
+
+def main():
+    while True:
+        exam()
+        try:
+            yn = input('Contine(y/n)?').strip()[0]
+        except IndexError:
+            continue
+        except (KeyboardInterrupt,EOFError):
+            yn = 'n'
+        if yn in 'nN':
+            print('\nByeBye!')
+            break
+
+if __name__ == '__main__':
+    main()
+
+匿名函数:没有名称的函数,通过lambda定义
+a = lambda x,y: x + y	#x,y是两个参数,x+y是返回结果
+a(10,20)
+
+filter(func,seq)函数
+import random
+
+def func1(x):   # 接收整数作为参数
+    return x % 2    # 1为True，0为False
+
+if __name__ == '__main__':
+    nums = [random.randint(1, 100) for i in range(10)]
+    # [36, 73, 74, 50, 44, 41, 45, 79, 72, 74]
+    print(nums)
+    # filter的第一个参数是函数，nums中各项将会当成func1的参数
+    # 经过func1的计算，如果返回值是True则保留，False舍弃
+    result = filter(func1, nums)
+    result2 = filter(lambda x: x % 2, nums)	#使用匿名函数
+    print(list(result))
+    print(list(result2))
+
+map(func,seq)函数
+用函数处理seq中的每个元素并保留结果
+result = map(lambda x: x * 2 + 1, nums)
+print(list(result))
+
+变量
+1、全局变量：在函数外面定义的变量。作用域整个程序中都可以调用，直到程序结束
+2、局部变量：在函数内部定义的变量。作用域只在函数内可用，函数调用结束，局部变量消失
+3、全局和局部如果有同名的变量，函数调用时，首先查找局部。局部变量将会把全局变量遮盖住。
+x = 10
+def func():
+    x = 'hello'
+    print(x)
+func()	#局部x，值是hello
+x		#全局x，值是10
+4、在函数内部使用global语句，调用全局变量
+x = 10
+def add():
+    global x
+    x += 10
+    print(x)
+add()		#x的值为20
+print(x)	#x的值为20
+
+名字空间
+系统查询顺序：查找局部变量，全局变量，内建变量
+
+偏函数：相当于改造现有函数，将一些参数固定下来后，生成新的函数
+>>>from functools import partial
+>>> def add(a, b, c, d, e):
+...     return a + b + c + d + e
+函数接受5个参数，但是大多数情况下，调用函数，前4个参数是固定的
+>>> add(10, 20, 30, 40, 5)
+>>> add(10, 20, 30, 40, 8)
+可以改造add函数，将前4个参数固定，生成的新函数取名为myadd
+>>> myadd = partial(add, 10, 20, 30, 40)
+>>> myadd(5)
+>>> myadd(8)
+
+简单的GUI程序代码
+#导入模块
+import tkinter
+from functools import partial
+
+#定义windows句柄
+window = tkinter.Tk()
+#定义界面标签显示内容
+lb = tkinter.Label(window,text='Hello world!')
+#使用偏函数定义tkinter.Button函数
+MyButton = partial(tkinter.Button,window,fg='white',bg='blue')
+#定义三个按钮内容
+b1 = MyButton(text='button 1')
+b2 = MyButton(text='button 2')
+b3 = MyButton(text='button 3',command=window.quit) #选择3退出
+#使用for循环安装3个按钮
+for i in (lb,b1,b2,b3):
+    i.pack()
+#主程序方法，显示窗口
+window.mainloop()
+
+Tkinter： Tkinter 模块(Tk 接口)是 Python 的标准 Tk GUI 工具包的接口 .Tk 和 Tkinter 可以在大多数的 Unix 平台下使用,同样可以应用在 Windows 和 Macintosh 系统里。Tk8.0 的后续版本可以实现本地窗口风格,并良好地运行在绝大多数平台中。
+Label	标签控件；可以显示文本和位图
+Button 按钮控件；在程序中显示按钮。
+Text	文本控件；用于显示多行文本
+
+递归函数
+快速排序：将第一个数假设为中间值，比它小的放到小列表，大的放到大列表，再把这三项拼接起来。
+小列表、大列表仍然要用同样的方法继承排序
+import random
+def sort(seq):
+    if len(seq) < 2:
+        return seq
+
+    middle = seq[0]
+    smaller = []
+    larger = []
+    for i in seq[1:]:
+        if middle > i:
+            smaller.append(i)
+        else:
+            larger.append(i)
+    return sort(smaller) + [middle] + sort(larger)
+
+if __name__ == '__main__':
+    nums = [random.randint(1,100) for i in range(10)]
+    print(nums)
+    print(sort(nums))
+
+#冒泡排序
+def sort(seq):
+    count = len(seq)
+    for i in range(0,count):
+        for j in range(i+1,count):
+            if seq[i] > seq[j]:
+                seq[i],seq[j] = seq[j],seq[i]
+    return seq
+if __name__ == '__main__':
+    nums = [random.randint(1,100) for i in range(10)]
+    print(nums)
+    print(sort(nums))
+
+生成器：本质上是一个函数。常规的函数只能通过return返回一个结果，但是生成器可以通过yield语句返回多个中间结果。
+程序遇到yield会暂停,直到再向生成器取数据时继续执行
+def mygen():
+    yield 'hello world'
+    a = 10 + 320
+    yield a
+    yield [1,2,3]
+a = mygen()
+a.__next__()	#一个一个值调出，且只能调用一次
+for i in a:		#一般使用for循环调用
+    print(i)
+
+每次取文件中10行内容并打印
+def blocks(fobj):
+    content = []
+    counter = 0
+    for line in fobj:
+        content.append(line)    # 向列表追加数据
+        counter += 1
+        if counter == 10:   # 如果已经向列表追加了10行，则生成
+            yield content   # 遇到yield，返回数据，暂停执行，直到再向生成器取数据时才继续向下执行
+            content.clear() # 生成完数据后，再把列表清空
+            counter = 0     # 计数器清0
+    if content:
+        yield content   # 如果最后不足10行，也要把它返回
+
+
+if __name__ == '__main__':
+    fname = '/etc/passwd'
+    with open(fname) as fobj:
+        for lines in blocks(fobj):  # blocks是一个生成器，每次返回10行
+            print(lines)
+            print('*' * 20)
+
+闭包：自定义函数中嵌套自定义函数
+def say_hi(word):
+    def greet():
+        lb.config(text='Hello %s' % word)
+    return greet
+
+装饰器：也是闭包
+def hello():
+    return 'Hello World!'
+
+@set_color	#相当于将welcome传入set_color中
+def welcome():
+    return 'Hello China'
+
+def set_color(func):
+    def color():
+        return '\033[31;1m%s\033[0m' % func()
+    return color
+
+if __name__ == '__main__':
+    a = set_color(hello)
+    print(a())
+    b = set_color(welcome)
+    print(b())
+
+查看系统模块文件：按住ctrl会变成超连接
+###########################################################################################
+
+Day03
+
+模块
+1、模块导入的时候会搜索两个路径
+（1）sys.path定义的路径,可以在python中查询已定义路径，''表示当前路径
+（2）PYTHONPATH环境变量定义的路径
+2、导入模块的方法
+import time,os,sys	#导入多个模块，不推荐此写法
+from random import choice	#导入模块中某个函数
+import pickle as p	#导入模块并定义别名
+3、模块文件导入和加载
+一个模块不管被导入多少次，只会被加载一次
+
+包
+1、类似文件的目录，可以当成特殊的模块
+sys.path.clear()	#实际存放的方式是sys/path/clear.py
+2、如果是python2，需在目录下创建__init__.py文件才能成为包
+3、写到__init__.py文件中的内容将成为包的内容(python2/3一样)
+
+绝对导入
+sys.path和PYTHONPATH
+相对导入
+from . import xxx	#当前目录导入xxx模块
+from .. import xxx #上一级目录导入xxx模块
+
+内置模块
+www.cmd5.com	#密文查询明文网站
+hashlib模块
+1、md5：是一种单向加密的算法。
+/etc/shadow中加密用的是sha512加密方式
+单向加密就是相同的数据总是能生成相同长度的乱码。源数据相同，乱码也一定是相同的。
+不能通过乱码反推回原始数据。可以用来存储密码，也可以用来校验文件的完整性。
+2、应用
+>>> import hashlib
+>>> m = hashlib.md5(b'123456')
+>>> m.hexdigest()
+
+>>> with open('/etc/passwd', 'rb') as fobj:
+...     data = fobj.read()
+>>> m = hashlib.md5(data)
+>>> m.hexdigest()
+
+#生成文件md5值的程序
+import sys
+import hashlib
+
+def check_md5(fname):
+    m = hashlib.md5()
+    with open(fname,'rb') as fobj:
+        while True:
+            data = fobj.read(4096)
+            if not data:
+                break
+            m.update(data)
+    return m.hexdigest()
+
+if __name__ == '__main__':
+    print(check_md5(sys.argv[1]))
+
+tarfile模块
+创建tar文件，支持gzip、bzip2格式
+1、压缩
+>>> import tarfile
+>>> tar = tarfile.open('/tmp/mydemo/anquan.tar.gz', 'w:gz')	#以gz格式创建并打开一个压缩文件
+>>> tar.add('/etc/hosts')	#向压缩文件中添加需要压缩的文件
+>>> import os
+>>> os.chdir('/etc')	#切换目录到/etc下
+>>> tar.add('security')
+>>> tar.close()
+2、解压
+>>> os.chdir('/tmp/mydemo')
+>>> tar = tarfile.open('/tmp/mydemo/anquan.tar.gz', 'r:gz')	#以gz格式打开压缩文件
+>>> tar.extractall()	#解压缩
+>>> tar.close()
+
+备份文档程序
+'''
+    需要支持完全和增量备份
+    周一执行完全备份
+    其他时间执行增量备份
+    备份文件需要打包为tar文件并使用gzip格式压缩
+'''
+from time import strftime
+import os
+import tarfile
+import pickle
+import hashlib
+
+#校验文件md5值
+def check_md5(fname):
+    m = hashlib.md5()
+    with open(fname, 'rb') as fobj:
+        while True:
+            data = fobj.read(4096)
+            if not data:
+                break
+            m.update(data)	#更新md5值
+    return m.hexdigest()		#返回文件的md5值
+
+#完全备份
+def full_back(src,dest,md5file):
+    #打包整个文件，并且计算每个文件的md5值
+    #备份名：文件名_完全/增量_时间.tar.gz
+    fname = os.path.basename(src.rstrip('/'))	#获取最右边名字，并取消/
+    fname = '%s_full_%s.tar.gz' %(fname,strftime('%Y%m%d'))
+    fname = os.path.join(dest,fname)	#拼接文件的绝对路径
+
+     #打包文件
+    tar = tarfile.open(fname,'w:gz')
+    tar.add(src)
+    tar.close()
+
+     #对应每个文件生成md5值保存到字典中
+    md5_dict = {}
+    #os.walk递归显示文件，元组形式，第一项是文件目录，第二项是目录下的目录，第三项是目录中的文件，拼接1，3即绝对路径
+    for path,dir,files in os.walk(src):	#遍历目录文件
+        for file in files:		#遍历目录下的文件
+            full_file = os.path.join(path,file)	#将目录名和文件名拼接，得到绝对路径
+            md5_dict[full_file] = check_md5(full_file)	#获得每个文件md5值
+
+     #将字典存入文件，永久保存
+    with open(md5file,'wb') as fobj:
+        pickle.dump(md5_dict,fobj)
+
+def incr_back(src,dest,md5file):
+    fname = os.path.basename(src.rstrip('/'))
+    fname = '%s_incr_%s.tar.gz' % (fname, strftime('%Y%m%d'))
+    fname = os.path.join(dest, fname)
+
+    with open(md5file,'rb') as fobj:
+        old_md5 = pickle.load(fobj)
+
+    new_md5 = {}
+    for path, dir, files in os.walk(src):
+        for file in files:
+            full_file = os.path.join(path, file)
+            new_md5[full_file] = check_md5(full_file)
+
+    tar = tarfile.open(fname,'w:gz')
+    for key in new_md5:
+	  #if key not in old_md5 or new_md5[key] != old_md5[key]:
+        if old_md5.get(key) != new_md5[key]:	#判断老的字典中是否有新字典的值且相等，没有或不等则备份
+            tar.add(key)
+    tar.close()
+
+    with open(md5file,'wb') as fobj:	#更新md5文件
+        pickle.dump(new_md5,fobj)
+
+if __name__ == '__main__':
+    src = '/tmp/mydemo/security/'
+    dest = '/tmp/mydemo/'
+    md5file = '/tmp/mydemo/md5.data'
+    if strftime('%a') == 'Mon':
+        full_back(src,dest,md5file)
+    else:
+        incr_back(src,dest,md5file)
+
+
+OOP：面向对象的编程
+将数据和行为进行融合。可以先创建一个蓝图，然后再根据蓝图创建具体的实例。
+可以极大的减少代码量
+class Bear():   #定义类
+    def __init__(self,color,size):
+        #在实例化的时候，自动调用。实例自动成为第一个参数self
+        self.color = color  #把属性绑定到具体的实例
+        self.size = size
+
+    def sing(self):
+        print('My is %s!' %self.size)
+
+if __name__ == '__main__':
+    bear_big = Bear('brown','large')    #创建实例
+    print(bear_big.color,bear_big.size)
+    bear_big.sing()     #实例bear_big自动成为第一个参数传递
+
+    bear2 = Bear('brown','middle')
+    bear2.sing()	#bear2自动成为第一个参数
+
+
+修改全文某个单词：选中单词shift + f6
+组合：在类中加入其他的类增加功能
+class Vendor:
+    def __init__(self, ph):
+        self.phone = ph
+
+class Bear:
+    def __init__(self, color, size, phone):
+        self.color = color  # 把属性绑定到具体的实例
+        self.size = size
+        self.vendor = Vendor(phone)	#类中调用其他类，组合
+
+    def sing(self):
+        print("My color is %s, Lalala" % self.color)
+
+if __name__ == '__main__':
+    bear1 = Bear('Brown', 'Large', '400-123-5678')
+    print(bear1.vendor.phone)
+    v1 = Vendor('400-111-2222')
+    print(v1.phone)
+
+创建子类（派生或继承）
+在圆括号中写明父类名即可继承其所有属性和方法
+若子类和父类有相同的方法，父类将被覆盖，若不想覆盖，明确指明使用父类的方法，可用super函数
+class Bear():   #定义类
+    def __init__(self,color,size):
+        #在实例化的时候，自动调用。实例自动成为第一个参数self
+        self.color = color  #把属性绑定到具体的实例
+        self.size = size
+
+    def sing(self):
+        print('My is %s!' % self.size)
+
+class NewBear(Bear):	#创建子类，包含父类(基类)的所有方法和属性，还有自身额外的一些属性和方法
+    def __init__(self,name,color,size):
+        #Bear.__init__(self,color,size)	#效果与下相同，但不推荐，尽量不要出现父类名字
+        super(NewBear, self).__init__(color,size)  #推荐写法，调用父类方法
+        self.name = name
+
+    def run(self):
+        print('I can run...')
+
+if __name__ == '__main__':
+    bear1 = NewBear('brown','larger')
+    print(bear1.color,bear1.size)
+    bear1.run()
+    print(bear1.name)
+
+多重继承：一个子类可以拥有多个父类的属性
+若父类中有相同的方法，子类查找顺序：自身查找-->从左向右，找到第一个就停止
+class A():
+    def hello(self):
+        print('hello')
+
+class B():
+    def welcome(self):
+        print('welcome')
+
+class C(A,B):	#继承多个父类
+    pass
+
+if __name__ == '__main__':
+    mc = C()
+    mc.hello()
+    mc.welcome()
+
+特殊方法
+OOP编程时，有一些以__开头和结尾的方法，被称作magic魔法方法
+class Book():
+    def __init__(self,title,author):	#构造函数，默认会第一个调用此方法
+        self.title = title
+        self.author = author
+
+    def __str__(self):	#用于将值转化为适于人阅读的形式
+        return '《%s》'%self.title
+
+    def __call__(self):	#用调用类时使用此方法
+        print('《%s》is written by %s' %(self.title,self.author))
+
+if __name__ == '__main__':
+    core_py = Book('Core Python','Wesley')	#调用__init__
+    print(core_py)	#调用__str__
+    core_py()		#调用__call__
+
+类方法
+1、使用 @classmethod 装饰器定义，第一个参数cls表示类本身（了解即可）
+2、静态方法 @staticmethod
+class Date:
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+
+    @classmethod   # 声明成类方法，没有实例也可以调用
+    def create_date(cls, str_date):  # cls表示类Date,不是实例
+        """
+        一般来说，需要先创建实例，再通过实例调用方法。没有实例就需要调用方法
+        可以将方法声明为类方法。
+        """
+        date_list = str_date.split('-')
+        y = int(date_list[0])
+        m = int(date_list[1])
+        d = int(date_list[2])
+        return cls(y, m, d)
+
+    @staticmethod  # 定义静态方法。相当于跟类没有任何关系，硬塞到类中的方法
+    def is_date_valid(str_date):
+        y, m, d = map(int, str_date.split('-'))
+        return y < 4000 and 1 <= m <= 12 and 1 <= d <=31
+
+if __name__ == '__main__':
+    d1 = Date(2019, 2, 20)
+    d2 = Date.create_date('2019-2-21')  # 通过类方法创建实例
+    print(d2.year)
+    print(Date.is_date_valid('2019-2-2'))
+
+
+###########################################################################################
+
+Day04
+
+正则表达式:
+. 匹配任意单个字符
+[...x-y...] 匹配字符组里的任意字符
+[^...x-y...] 匹配不在字符组里的任意字符
+
+\d 匹配任意数字，与[0-9]同义
+\D 匹配任意不是数字的字符，\d的取反
+
+\w 匹配任意数字字母字符，与[0-9a-zA-Z]同义
+\W 匹配任意不是数字字母字符，\w的取反
+ 
+\s 匹配空白字符，与[\r\v\f\t\b\n]同义
+\S 匹配非空字符，\s的取反
+
+例子：
+]# vim 1.txt
+192.168.1.1   00301sdfxfds
+192.168.1.1   00301sdfxfds
+192.168.1.1   00301sdfxfds
+
+:%s/\(..\)\(..\)\(..\)\(..\)\(..\)\(..\)$/\1:\2:\3:\4:\5:\6/
+
+替换后结果：
+192.168.1.1   00:30:1s:df:xf:ds
+192.168.1.1   00:30:1s:df:xf:ds
+192.168.1.1   00:30:1s:df:xf:ds
+
+匹配一组字符：
+reg1 | reg2  匹配正则表达式 reg1或者reg2
+*                匹配前面出现的正则表达式零次或多次
++               匹配前面出现的正则表达式一次或多次
+？               匹配前面出现的正则表达式零次或一次
+[M,N]        匹配前面出现的正则表达式至少M次最多N次
+
+其它元字符：
+^           匹配字符串的开始
+$           匹配字符串的结尾
+\b       匹配单词的边界
+()          对正则表达式分组
+\nn      匹配已保存的子组
+
+贪婪匹配：*、+、？都是贪婪匹配操作符，在其后加上？可以取消贪婪匹配行为（最短匹配）,匹配对象通过 groups 函数获取子组
+
+
+核心函数和方法
+re模块：match 函数 、尝试用正则表达式从字符串开头匹配，如匹配成功
+
+match函数：尝试用正则表达式模式从字符串的开头匹配,如果匹配成功,则返回一个匹配对象;否则返回None。
+import re
+m = re.match('foo','food') #成功匹配
+print('m',m)
+m = re.match('foo','seafood') #未能匹配
+print('m',m)
+
+search函数：在字符串中査找正则表达式模式的第一次出现,如果匹配成功,则返回一个匹配对象;否则返回None。
+m = re.search('foo','food')
+print(m)
+m = re.search('foo','seafood') #可以匹配在中间的模式
+print(m)
+
+group方法：使用 match或 search匹配成功后,返回的匹配对象可以通过 group方法获得匹配内容。
+m = re.match('foo','food')
+print(m.group())
+
+m = re.search('foo','seafood')
+m = m.group()
+print(m)
+
+findall函数：在字符串中査找正则表达式模式的所有(非重复)出现;返回一个匹配对象的列表。
+m = re.findall('f..','seafood is food')   #匹配所有，返回列表，占用内存
+print(m)
+
+finditer函数：和 (findall)函数有相同的功能,但返回的不是列表而是迭代器;对于每个匹配,该迭代器返回一个匹配对象
+m = re.finditer('f..','seafood is food')  #匹配一次给一个，不占用内存
+print(m)
+for item in m:
+    print(item.group())
+
+compile函数：对正则表达式模式进行编译,返回一个正则表达式对象,不是必须要用这种方式,但是在大量匹配的情况下,可以提升效率
+patt = re.compile('foo')  #先编译后再匹配，此方式在大批量匹配时可提升效率
+m = patt.match('food')
+print(m.group())
+
+split方法：根据正则表达式中的分隔符把字符分割为一个列表,并返回成功匹配的列表,字符串也有类似的方法,但是正则表达式更加灵活.
+>>> import re #使用.和-作为字符串的分隔符
+>>> mylist = re.split('\.|-','hello-world.data')
+>>> print(mylist)
+['hello','wold','data']
+
+sub方法：把字符串中所有匹配正则表达式的地方替换成新的字符串
+>>> import re   #re.sub(pattern, repl, string, count=0, flags=0)
+>>> m = re.sub('X','Mr.Smith','attn:X\nDear X')
+>>> print(m)
+attn:Mr.Smith
+Dear Mr.Smith
+
+>>> replacedStr = re.sub("\d+", "222", inputStr)
+
+练习：分析appache日志
+
+###################  通用方法  ###################
+#!/usr/bin/env python3
+import re
+def count_patt(fname,patt):
+    cpatt = re.compile(patt) #编译模式提升效率
+    patt_dict = {}
+    with open(fname) as fobj:
+        for line in fobj:
+            m = cpatt.search(line)
+            if m: #匹配成功返回一个对象，非空即为真，否则为假
+                key = m.group()
+                patt_dict[key] = patt_dict.get(key,0) + 1
+    return patt_dict
+
+if __name__ == '__main__':
+    fname = 'access_log'
+    ip = '^(\d+.){3}\d+'  #匹配192.168.1.1  \d+. 出现了三次，最后一个是\d+
+    print(count_patt(fname,ip))
+
+###################  OOP类对象方法  ###################
+#!/usr/bin/env python3
+import re
+class CountPatt:
+    def __init__(self,fname):
+        self.fname = fname
+
+    def count_patt(self,reg):
+        m = re.compile(reg)
+        patt_dict = {}
+        with open(self.fname) as fobj:
+            for line in fobj:
+                d = m.search(line)
+                if d:
+                    key = d.group()
+                    patt_dict[key] = patt_dict.get(key,0) + 1
+        return patt_dict
+
+if __name__ == '__main__':
+    fname = 'access_log'
+    reg = '^(\d+\.){3}\d+'
+    br = 'Chrom|Firefox|MSIE'
+    a = CountPatt(fname)
+    print(a.count_patt(reg))
+
+
+C/S架构：服务器是一个软件或硬件,用于提供客户需要的"服务"、硬件上,客户端常见的就是平时所使用的PC机,服务器常见的有联想、DEL等厂商生产的各种系列服务器、软件上,服务器提供的服务主要是程序的运行,数据的发送与接收、合并、升级或其它的程序或数据的操作
+
+socket模块：网络编程的底层模块
+套接字：抽象概念，可以想象成网卡接口。需要绑定地址信息(TCP/UDP、IP地址、端口)
+
+import  socket
+#======================服务端======================
+host = '' #0.0.0.0
+port = 12345
+addr = (host,port)  #定义ip和端口
+
+server = socket.socket() #默认创建TCP套接字
+
+#当程序结束后，一分钟内再次启动会出现一个问题，报错，Address already in use，地址已在使用中，因为系统默认保留1分钟，加上以下选项socket.SOL_SOCKET ,socket.SO_REUSEADDR,1 当程序退出后不会保留1分钟
+server.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+
+server.bind(addr) #将地址绑定到套接字
+server.listen(1) #启动监听，1表示允许的客户端数目，必须提供，但是没有太大意义
+client_sock,cli_addr = server.accept()  #接收客户端的连接请求，返回元组(客户机套接字, 客户机地址)
+data = client_sock.recv(1024) #一次最多1接收1024字节，类似于文件的read
+print(data)
+sdata = '吃了吗？\r\n' #网络发送数据一般结尾是回车换行,英文前家一个b'abc'即可 8
+
+client_sock.send(sdata.encode()) #网络发送数据要求是bytes类型
+client_sock.close() #关闭客户机套接字
+server.close() #关闭服务器套接字
+
+#=======================客户端=====================
+
+]# yum -y install telnet
+]# telnet 127.0.0.1 12345
+Trying 127.0.0.1...
+Connected to 127.0.0.1.
+Escape character is '^]'.
+你好       #回车
+吃了吗？   #客户端收到
+Connection closed by foreign host.  # 连接被外部主机关闭
+
+
+import socket
+server = '127.0.0.1'
+port = 12345
+addr = (server,port)
+c = socket.socket()
+c.connect(addr)
+
+while 1:
+    data = input('> :') + '\r\n'
+    c.send(data.encode())
+    if  data.strip() == 'quit':
+        break
+    rdata = c.recv(1024)
+    print(rdata.decode())
+
+c.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
